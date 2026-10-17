@@ -2,76 +2,103 @@ import os
 from datetime import datetime, timedelta
 from pymongo import MongoClient
 from telegram import Update
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+from telegram.ext import Application, CommandHandler, ContextTypes
 
 TOKEN = os.getenv("BOT_TOKEN")
 MONGO_URL = os.getenv("MONGO_URL")
 
-# MongoDB connect
 client = MongoClient(MONGO_URL)
 users = client["pure_ai"]["users"]
 
+MINE_AMOUNT = 3
+MINE_HOURS = 12
+REF_BONUS = 10
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     uid = update.effective_user.id
-    name = update.effective_user.first_name
+    user = users.find_one({"user_id": uid})
     
-    # User illana create pannu
-    existing = users.find_one({"user_id": uid})
-    if not existing:
-        # Referral check
+    if not user:
         if context.args:
             try:
                 ref_id = int(context.args[0])
-                # Thannai thanye refer panna koodathu
                 if ref_id != uid:
-                    ref_user = users.find_one({"user_id": ref_id})
-                    if ref_user:
-                        # Referrer ku bonus add
-                        users.update_one(
-                            {"user_id": ref_id},
-                            {"$inc": {"friends": 1, "earned": 10, "balance": 10}}
-                        )
-            except:
-                pass
+                    ref = users.find_one({"user_id": ref_id})
+                    if ref:
+                        users.update_one({"user_id": ref_id}, {"$inc": {"friends": 1, "balance": REF_BONUS, "earned": REF_BONUS}})
+                        await context.bot.send_message(ref_id, f"🎉 New referral! +{REF_BONUS} PURE from {update.effective_user.first_name}")
+            except: pass
         
-        # Puthu user ah save pannu
         users.insert_one({
             "user_id": uid,
-            "name": name,
             "balance": 0,
-            "speed": 0.1, # 0.1 / Hour
-            "level": 1,
             "friends": 0,
             "earned": 0,
-            "last_claim": datetime.utcnow() - timedelta(hours=4)
+            "last_mine": datetime.utcnow() - timedelta(hours=13)
         })
+        await update.message.reply_text(
+            f"🚀 Welcome to PURE AI TOKEN!\n\n"
+            f"⛏️ /mine - Mine 3 PURE every 12 hours\n"
+            f"💰 /balance - Check your ledger balance\n"
+            f"👥 /referral - Earn 10 PURE per referral\n\n"
+            f"PURE balances are ledger entries stored in database, not on-chain tokens."
+        )
+    else:
+        await update.message.reply_text("Welcome back! Use /mine to start mining PURE.")
+
+async def mine(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    uid = update.effective_user.id
+    user = users.find_one({"user_id": uid})
+    if not user:
+        await update.message.reply_text("Please /start first")
+        return
+    
+    now = datetime.utcnow()
+    next_time = user["last_mine"] + timedelta(hours=MINE_HOURS)
+    
+    if now < next_time:
+        remaining = next_time - now
+        hrs = int(remaining.total_seconds() // 3600)
+        mins = int((remaining.total_seconds() % 3600) // 60)
+        await update.message.reply_text(f"⏳ Next claim in {hrs}h {mins}m")
+        return
+    
+    users.update_one({"user_id": uid}, {"$set": {"last_mine": now}, "$inc": {"balance": MINE_AMOUNT}})
+    new_bal = user["balance"] + MINE_AMOUNT
     
     await update.message.reply_text(
-        f"🚀 Welcome {name} to PURE AI TOKEN!\n\n"
-        f"⛏️ Mining: 0.1 PURE / Hour\n"
-        f"👥 Referral: 10 PURE per friend (10%)\n\n"
-        f"Open Mini App to start mining!"
+        f"Mining complete: +{MINE_AMOUNT} PURE.\n"
+        f"Ledger balance: {new_bal} PURE.\n"
+        f"Your next claim is available in {MINE_HOURS} hours."
     )
 
-async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # Ippo yaar message anupunaalum avanga data paathu reply pannum
+async def balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
     uid = update.effective_user.id
-    u = users.find_one({"user_id": uid})
-    bal = u["balance"] if u else 0
-    friends = u["friends"] if u else 0
-    
+    user = users.find_one({"user_id": uid})
+    if not user:
+        await update.message.reply_text("Please /start first")
+        return
+    await update.message.reply_text(f"💰 Ledger balance: {user['balance']} PURE.\n👥 Friends: {user['friends']}")
+
+async def referral(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    uid = update.effective_user.id
+    botname = (await context.bot.get_me()).username
+    link = f"https://t.me/{botname}?start={uid}"
+    user = users.find_one({"user_id": uid})
+    count = user["friends"] if user else 0
     await update.message.reply_text(
-        f"You said: {update.message.text}\n\n"
-        f"💰 Balance: {bal} PURE\n"
-        f"👥 Friends: {friends}\n"
-        f"Pure AI thinking... 🧠✨"
+        f"👥 Your referral link:\n{link}\n\n"
+        f"Friends: {count}\n"
+        f"Earn {REF_BONUS} PURE per referral."
     )
 
 def main():
     app = Application.builder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat))
-    print("Pure AI Bot with MINING Started")
+    app.add_handler(CommandHandler("mine", mine))
+    app.add_handler(CommandHandler("balance", balance))
+    app.add_handler(CommandHandler("referral", referral))
+    print("PURE AI BOT Live - Mining Enabled")
     app.run_polling()
 
 if __name__ == "__main__":
