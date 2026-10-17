@@ -1,4 +1,5 @@
 import os
+import asyncio
 import threading
 from datetime import datetime, timedelta
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -16,7 +17,6 @@ MINE_AMOUNT = 3
 MINE_HOURS = 12
 REF_BONUS = 10
 
-# Dummy web server for Render
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
@@ -28,7 +28,6 @@ def run_server():
     port = int(os.getenv("PORT", 10000))
     HTTPServer(("0.0.0.0", port), Handler).serve_forever()
 
-# Handlers
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     uid = update.effective_user.id
     if not users.find_one({"user_id": uid}):
@@ -46,27 +45,35 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def mine(update: Update, context: ContextTypes.DEFAULT_TYPE):
     u = users.find_one({"user_id": update.effective_user.id})
-    if not u: await update.message.reply_text("Please /start first"); return
+    if not u:
+        await update.message.reply_text("Please /start first")
+        return
     now = datetime.utcnow()
     nxt = u["last_mine"] + timedelta(hours=MINE_HOURS)
     if now < nxt:
         rem = nxt - now
-        await update.message.reply_text(f"⏳ Next claim in {int(rem.total_seconds()//3600)}h {int((rem.total_seconds()%3600)//60)}m"); return
+        h = int(rem.total_seconds()//3600)
+        m = int((rem.total_seconds()%3600)//60)
+        await update.message.reply_text(f"⏳ Next claim in {h}h {m}m")
+        return
     users.update_one({"user_id": update.effective_user.id}, {"$set": {"last_mine": now}, "$inc": {"balance": MINE_AMOUNT}})
     await update.message.reply_text(f"Mining complete: +{MINE_AMOUNT} PURE.\nLedger balance: {u['balance']+MINE_AMOUNT} PURE.\nYour next claim is available in {MINE_HOURS} hours.")
 
 async def balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
     u = users.find_one({"user_id": update.effective_user.id})
-    if not u: await update.message.reply_text("Please /start first"); return
+    if not u:
+        await update.message.reply_text("Please /start first")
+        return
     await update.message.reply_text(f"💰 Ledger balance: {u['balance']} PURE.\n👥 Friends: {u['friends']}")
 
 async def referral(update: Update, context: ContextTypes.DEFAULT_TYPE):
     uid = update.effective_user.id
     botname = (await context.bot.get_me()).username
     u = users.find_one({"user_id": uid})
-    await update.message.reply_text(f"👥 Your referral link:\nhttps://t.me/{botname}?start={uid}\n\nFriends: {u['friends'] if u else 0}\nEarn {REF_BONUS} PURE per referral.")
+    friends = u['friends'] if u else 0
+    await update.message.reply_text(f"👥 Your referral link:\nhttps://t.me/{botname}?start={uid}\n\nFriends: {friends}\nEarn {REF_BONUS} PURE per referral.")
 
-def main():
+async def main():
     threading.Thread(target=run_server, daemon=True).start()
     app = Application.builder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
@@ -74,7 +81,10 @@ def main():
     app.add_handler(CommandHandler("balance", balance))
     app.add_handler(CommandHandler("referral", referral))
     print("PURE AI BOT Live - Mining Enabled")
-    app.run_polling()
+    await app.initialize()
+    await app.start()
+    await app.updater.start_polling()
+    await asyncio.Event().wait()
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
