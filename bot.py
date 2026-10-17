@@ -1,14 +1,14 @@
 import os
 import asyncio
 import threading
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pymongo import MongoClient
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
 TOKEN = os.getenv("BOT_TOKEN")
-MONGO_URL = os.getenv("MONGO_URL")
+MONGO_URL = os.getenv("MONGO_URL") or os.getenv("MONGODB_URI")
 ADMIN_ID = 6978164887
 
 client = MongoClient(MONGO_URL)
@@ -22,6 +22,9 @@ REF_BONUS = 10
 MIN_WITHDRAW = 1000
 TOP_GOAL = 1000
 TOP_REWARD = 1000000
+
+def now_utc():
+    return datetime.now(timezone.utc)
 
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -47,11 +50,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     users.update_one({"user_id": ref}, {"$inc": {"friends": 1, "balance": REF_BONUS, "earned": REF_BONUS}})
                     try:
                         await context.bot.send_message(ref, f"🎉 New referral! +{REF_BONUS} PURE from {update.effective_user.first_name}")
-                    except:
-                        pass
-            except:
-                pass
-        users.insert_one({"user_id": uid, "balance": 0, "friends": 0, "earned": 0, "last_mine": datetime.utcnow() - timedelta(hours=13), "wallet": None, "top_claimed": False, "username": update.effective_user.username})
+                    except: pass
+            except: pass
+        users.insert_one({"user_id": uid, "balance": 0, "friends": 0, "earned": 0, "last_mine": now_utc() - timedelta(hours=13), "wallet": None, "top_claimed": False, "username": update.effective_user.username})
         await update.message.reply_text("🚀 Welcome to PURE AI TOKEN!\n\n⛏️ /mine - Mine 30 PURE every 12h\n💰 /balance - Check balance\n👥 /referral - Earn 10 PURE per friend\n👛 /setwallet - Set TON wallet (EQ/UQ 48 chars)\n💸 /withdrawal - Withdraw min 1000 PURE\n🏆 /top - Top 10 = 1M PURE bonus")
     else:
         await update.message.reply_text("Welcome back!\n/mine | /balance | /referral | /wallet | /setwallet | /withdrawal | /top")
@@ -61,8 +62,11 @@ async def mine(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not u:
         await update.message.reply_text("Please /start first")
         return
-    now = datetime.utcnow()
-    nxt = u["last_mine"] + timedelta(hours=MINE_HOURS)
+    now = now_utc()
+    last = u["last_mine"]
+    if last.tzinfo is None:
+        last = last.replace(tzinfo=timezone.utc)
+    nxt = last + timedelta(hours=MINE_HOURS)
     if now < nxt:
         rem = nxt - now
         h = int(rem.total_seconds() // 3600)
@@ -97,8 +101,7 @@ async def referral(update: Update, context: ContextTypes.DEFAULT_TYPE):
         extra = f"\n\n🏆 CONGRATS! Top10 + {TOP_GOAL} refs = +{TOP_REWARD} PURE!"
         try:
             await context.bot.send_message(ADMIN_ID, f"🏆 TOP REWARD: {uid} @{update.effective_user.username} Friends:{friends}")
-        except:
-            pass
+        except: pass
     await update.message.reply_text(f"👥 Your Referral Link:\nhttps://t.me/{me.username}?start={uid}\n\nFriends: {friends}\nEarn {REF_BONUS} PURE per referral\n\n🏆 Top 10 with {TOP_GOAL}+ refs = {TOP_REWARD} PURE!{extra}")
 
 async def wallet_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -115,7 +118,7 @@ async def wallet_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     addr = context.args[0].strip()
     if not is_ton(addr):
-        await update.message.reply_text("❌ Invalid TON wallet!\n\nMust:\n- Start with EQ or UQ\n- Exactly 48 characters\n\nExample:\nEQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB")
+        await update.message.reply_text("❌ Invalid TON wallet!\n\nMust:\n- Start with EQ or UQ\n- Exactly 48 characters")
         return
     users.update_one({"user_id": update.effective_user.id}, {"$set": {"wallet": addr}})
     await update.message.reply_text(f"✅ TON Wallet Registered!\n\n{addr}\n\nNow you can /withdrawal <amount> (min 1000 PURE)")
@@ -127,7 +130,7 @@ async def withdraw(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     wallet = u.get("wallet")
     if not wallet:
-        await update.message.reply_text("❌ No TON wallet set!\nFirst:\n/setwallet EQ... (48 chars TON only)\nThen: /withdrawal 1000")
+        await update.message.reply_text("❌ No TON wallet set!\nFirst:\n/setwallet EQ... (48 chars TON only)")
         return
     if not is_ton(wallet):
         await update.message.reply_text("❌ Saved wallet invalid! Set again: /setwallet EQ...")
@@ -141,18 +144,17 @@ async def withdraw(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ Example: /withdrawal 1000")
         return
     if amt < MIN_WITHDRAW:
-        await update.message.reply_text(f"❌ Minimum {MIN_WITHDRAW} PURE required to withdraw")
+        await update.message.reply_text(f"❌ Minimum {MIN_WITHDRAW} PURE required")
         return
     if u["balance"] < amt:
         await update.message.reply_text(f"❌ Insufficient balance. You have only {u['balance']} PURE")
         return
     users.update_one({"user_id": update.effective_user.id}, {"$inc": {"balance": -amt}})
-    withdraws.insert_one({"user_id": update.effective_user.id, "username": f"@{update.effective_user.username}", "amount": amt, "wallet": wallet, "status": "PENDING", "time": datetime.utcnow()})
+    withdraws.insert_one({"user_id": update.effective_user.id, "username": f"@{update.effective_user.username}", "amount": amt, "wallet": wallet, "status": "PENDING", "time": now_utc()})
     await update.message.reply_text(f"✅ Withdrawal Submitted!\n\nAmount: {amt} PURE\nTON Wallet: {wallet}\nStatus: PENDING (24h)\n\nRemaining balance: {u['balance']-amt} PURE")
     try:
-        await context.bot.send_message(ADMIN_ID, f"🚨 NEW WITHDRAWAL (TON)\nUser: @{update.effective_user.username} ({update.effective_user.id})\nAmount: {amt} PURE\nWallet: {wallet}\nLeft: {u['balance']-amt} PURE")
-    except:
-        pass
+        await context.bot.send_message(ADMIN_ID, f"🚨 NEW WITHDRAWAL (TON)\nUser: @{update.effective_user.username} ({update.effective_user.id})\nAmount: {amt} PURE\nWallet: {wallet}")
+    except: pass
 
 async def top(update: Update, context: ContextTypes.DEFAULT_TYPE):
     top_users = list(users.find().sort("friends", -1).limit(10))
@@ -165,7 +167,7 @@ async def top(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(txt)
 
 async def help_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("📋 Commands:\n/mine - Mine 30 PURE every 12h\n/balance - Check ledger\n/referral - Invite link (10 PURE/ref)\n/wallet or /setwallet - Set TON wallet EQ/UQ 48 chars\n/withdrawal <amount> - Withdraw min 1000 PURE to TON\n/top - Top 10 leaderboard 1M reward\n/help - This help")
+    await update.message.reply_text("📋 Commands:\n/mine - Mine 30 PURE every 12h\n/balance - Check ledger\n/referral - Invite link (10 PURE/ref)\n/wallet or /setwallet - Set TON wallet\n/withdrawal <amount> - Withdraw min 1000 PURE\n/top - Top 10 leaderboard\n/help - This help")
 
 async def main():
     threading.Thread(target=run_server, daemon=True).start()
@@ -181,7 +183,7 @@ async def main():
     app.add_handler(CommandHandler("top", top))
     app.add_handler(CommandHandler("help", help_cmd))
     app.add_handler(CommandHandler("kyc", help_cmd))
-    print("PURE AI BOT Live - TON Only - 30 PURE - Min 1000 - /withdrawal added")
+    print("PURE AI BOT Live")
     await app.initialize()
     await app.start()
     await app.updater.start_polling()
