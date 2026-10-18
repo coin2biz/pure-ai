@@ -7,7 +7,6 @@ from pymongo import MongoClient
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
-
 TOKEN = os.getenv("BOT_TOKEN", "").strip()
 MONGO_URL = (os.getenv("MONGO_URL") or os.getenv("MONGO_URI") or "").strip()
 ADMIN_ID = 6978164887
