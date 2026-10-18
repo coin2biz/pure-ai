@@ -8,7 +8,7 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
 TOKEN = os.getenv("BOT_TOKEN")
-MONGO_URL = os.getenv("MONGO_URL") or os.getenv("MONGODB_URI")
+MONGO_URL = os.getenv("MONGO_URL") or
 ADMIN_ID = 6978164887
 
 client = MongoClient(MONGO_URL)
