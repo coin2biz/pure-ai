@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body { background:#0f0f0f; color:white; font-family:monospace; text-align:center; padding:40px }
+    .btn { background:white; color:black; padding:15px 40px; border-radius:10px; font-size:20px; border:none }
+    .box { border:1px dashed white; padding:20px; margin:20px 0 }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>pure-ai-bot</h2>
+    <p>User: <span id="user">Loading...</span></p>
+    <p>Balance: <span id="bal">0</span> coins</p>
+  </div>
+  <button class="btn" onclick="tap()">TAP +1</button>
+  
+  <script>
+    let tg = window.Telegram.WebApp
+    tg.expand()
+    document.getElementById('user').innerText = tg.initDataUnsafe.user?.first_name || "User"
+    
+    let balance = 0
+    function tap(){
+      balance++
+      document.getElementById('bal').innerText = balance
+      // Send to backend
+      // fetch('/api/tap', {method:'POST', body: JSON.stringify({user_id: tg.initDataUnsafe.user.id})})
+    }
+  </script>
+</body>
+</html>
