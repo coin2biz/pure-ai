@@ -12,7 +12,7 @@ if (!token) {
 } else {
   const bot = new TelegramBot(token, { polling: true });
 
-  bot.onText(/\/start/, (msg) => {
+  bot.onText(/start/, (msg) => {
     bot.sendMessage(msg.chat.id, 
 `⛏️ Welcome to PURE AI TOKEN Mining!
 
