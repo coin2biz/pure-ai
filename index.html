@@ -1,34 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    body { background:#0f0f0f; color:white; font-family:monospace; text-align:center; padding:40px }
-    .btn { background:white; color:black; padding:15px 40px; border-radius:10px; font-size:20px; border:none }
-    .box { border:1px dashed white; padding:20px; margin:20px 0 }
-  </style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
-<body>
-  <div class="box">
-    <h2>pure-ai-bot</h2>
-    <p>User: <span id="user">Loading...</span></p>
-    <p>Balance: <span id="bal">0</span> coins</p>
-  </div>
-  <button class="btn" onclick="tap()">TAP +1</button>
-  
-  <script>
-    let tg = window.Telegram.WebApp
-    tg.expand()
-    document.getElementById('user').innerText = tg.initDataUnsafe.user?.first_name || "User"
-    
-    let balance = 0
-    function tap(){
-      balance++
-      document.getElementById('bal').innerText = balance
-      // Send to backend
-      // fetch('/api/tap', {method:'POST', body: JSON.stringify({user_id: tg.initDataUnsafe.user.id})})
-    }
-  </script>
+<body style="background:#0a0a0a;color:white;text-align:center;padding:20px;font-family:monospace">
+
+<h2>PURE AI TOKEN</h2>
+<div id="bal" style="font-size:40px;border:1px dashed white;padding:15px;margin:20px">0 $PURE</div>
+<button onclick="tap()" style="width:180px;height:180px;border-radius:50%;font-size:30px">PURE</button>
+<div id="energy" style="margin-top:20px">Energy: 1000/1000</div>
+
+<script>
+let b=0; let e=1000;
+const tg=Telegram.WebApp; tg.ready(); tg.expand();
+function tap(){
+ if(e<1) return;
+ b++; e--; 
+ document.getElementById('bal').innerText=b+' $PURE';
+ document.getElementById('energy').innerText='Energy: '+e+'/1000';
+ tg.HapticFeedback.impactOccurred('light');
+}
+setInterval(()=>{ b++; e=Math.min(e+1,1000); document.getElementById('bal').innerText=b+' $PURE'; document.getElementById('energy').innerText='Energy: '+e+'/1000'; },1000);
+</script>
 </body>
 </html>
