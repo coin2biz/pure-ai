@@ -82,4 +82,5 @@ app.get('/', (req,res)=> res.send('pure-ai running - fixed'));
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, ()=> console.log("Server running on "+PORT));
 
-  
+
+    
