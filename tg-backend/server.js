@@ -81,4 +81,4 @@ bot.on('polling_error', (err) => { console.log("Polling error: " + err.message);
 app.get('/', (req,res)=> res.send('pure-ai running - fixed'));
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, ()=> console.log("Server running on "+PORT));
-    
+
