@@ -74,3 +74,4 @@ bot.onText(/^(UQ|EQ|0Q)[A-Za-z0-9_-]+$/, (msg) => {
 bot.on('polling_error', (e) => console.log(e.message));
 app.get('/', (req, res) => res.send('PURE AI running'));
 app.listen(process.env.PORT || 10000, () => console.log("Server running"));
+    
