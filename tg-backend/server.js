@@ -56,15 +56,7 @@ bot.onText(/\/mine/, (msg) => {
     return;
   }
   user.balance += 3; user.lastMine = now; saveDB();
-  bot.sendMessage(msg.chat.id, `⛏️ You got 3 PURE!\n💰 Balance: ${user.balance} PURE`);
-});
-
-bot.onText(/\/balance/, (msg) => {
-  if (!msg.from_user) return;
-  const user = getUser(String(msg.from_user.id));
-  const w = user.wallet ? `\n👛 Wallet: ${user.wallet.substring(0,6)}...` : `\n👛 Wallet: Not set`;
-  bot.sendMessage(msg.chat.id, `💰 Balance: ${user.balance} PURE${w}\nReferrals: ${user.referrals}`);
-});
+  bot.sendMessage(msg.ch
 
 bot.onText(/\/referral/, (msg) => {
   if (!msg.from_user) return;
@@ -89,3 +81,4 @@ bot.on('polling_error', (err) => { console.log("Polling error: " + err.message);
 app.get('/', (req,res)=> res.send('pure-ai running - fixed'));
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, ()=> console.log("Server running on "+PORT));
+    
