@@ -85,6 +85,13 @@ bot.onText(/\/referral/, async (msg) => {
   let link = "https://t.me/pureaitoken_bot?start=" + userId;
   bot.sendMessage(msg.chat.id, "🔗 Your link:\n" + link + "\n\nEarn 10 PURE per referral!");
 });
+bot.onText(/\/withdraw/, async (msg) => {
+  let u = await getUser(msg.from.id);
+  if(u.balance < 5000){
+    return bot.sendMessage(msg.chat.id, `❌ Need 5000 PURE to withdraw!\n\n💰 Your Balance: ${u.balance} PURE\n\nKeep mining /mine`);
+  }
+  bot.sendMessage(msg.chat.id, `💸 WITHDRAWAL REQUEST 💸\n\n💰 Balance: ${u.balance} PURE\n📦 Amount: ${u.balance} PURE\n👛 Wallet: ${u.wallet || "Not set! Use /wallet"}\n\n✅ Request sent to @VKR9339\n⏰ Payment in 24 hours on TON!`);
+});
 
 bot.onText(/\/wallet/, (msg) => {
   bot.sendMessage(msg.chat.id, "👛 Send your TON wallet (UQ/EQ...)");
