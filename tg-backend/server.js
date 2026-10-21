@@ -58,7 +58,7 @@ bot.onText(/\/start(?: (.+))?/, async (msg, match) => {
     "/balance - Check balance\n" +
     "/referral - Get your link\n" +
     "/wallet - Set TON wallet\n" +
-    "/withdraw - withdrw PURE "
+    "/withdraw - withdraw PURE "
   );
 });
 
