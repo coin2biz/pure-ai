@@ -72,10 +72,10 @@ bot.onText(/\/mine/, async (msg) => {
     return bot.sendMessage(msg.chat.id, "⏳ Wait 1 hour to mine again!");
   }
   user.lastMine = now;
-  user.balance += 3;
+  user.balance += 30;
   user.mined += 30;
   await user.save();
-  bot.sendMessage(msg.chat.id, "⛏️ Mined 3 PURE! Balance: " + user.balance);
+  bot.sendMessage(msg.chat.id, "⛏️ Mined 30 PURE! Balance: " + user.balance);
 });
 
 bot.onText(/\/balance/, async (msg) => {
