@@ -54,7 +54,7 @@ bot.onText(/\/start(?: (.+))?/, async (msg, match) => {
   bot.sendMessage(chatId,
     "Welcome to PURE AI Token! 🚀\n\n" +
     "💎 Mine, Refer, Earn. Web3 Revolution!\n\n" +
-    "/mine - Mine 3 PURE\n" +
+    "/mine - Mine 30 PURE\n" +
     "/balance - Check balance\n" +
     "/referral - Get your link\n" +
     "/wallet - Set TON wallet\n" +
@@ -73,7 +73,7 @@ bot.onText(/\/mine/, async (msg) => {
   }
   user.lastMine = now;
   user.balance += 3;
-  user.mined += 3;
+  user.mined += 30;
   await user.save();
   bot.sendMessage(msg.chat.id, "⛏️ Mined 3 PURE! Balance: " + user.balance);
 });
