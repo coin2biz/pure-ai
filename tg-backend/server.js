@@ -68,8 +68,8 @@ bot.onText(/\/start(?: (.+))?/, async (msg, match) => {
 bot.onText(/\/mine/, async (msg) => {
   let user = await getUser(msg.from.id);
   let now = Date.now();
-  if (user.lastMine && now - user.lastMine < 3600000) {
-    return bot.sendMessage(msg.chat.id, "⏳ Wait 1 hour to mine again!");
+  if (user.lastMine && now - user.lastMine < 43200000) {
+    return bot.sendMessage(msg.chat.id, "⏳ Wait 12 hour to mine again! you got 30 PURE");
   }
   user.lastMine = now;
   user.balance += 30;
