@@ -89,6 +89,13 @@ bot.onText(/\/referral/, async (msg) => {
   await getUser(userId);
   let link = "https://t.me/pureaitoken_bot?start=" + userId;
   bot.sendMessage(msg.chat.id, "🔗 Your link:\n" + link + "\n\nEarn 50 PURE per referral!");
+});bot.onText(/\/top/, async (msg) => {
+  let top = await User.find().sort({balance:-1}).limit(20);
+  let t = "🏆 TOP 20 PURE HOLDERS 🏆\n\n";
+  for(let i=0;i<top.length;i++){
+    t += (i+1) + ". User " + String(top[i].userId).slice(-4) + " - " + top[i].balance + " PURE\n";
+  }
+  bot.sendMessage(msg.chat.id, t);
 });
 bot.onText(/\/withdraw/, async (msg) => {
   let u = await getUser(msg.from.id);
