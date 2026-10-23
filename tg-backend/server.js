@@ -21,7 +21,8 @@ const UserSchema = new mongoose.Schema({
   mined: { type: Number, default: 0 },
   wallet: { type: String, default: "" },
   referred: { type: Boolean, default: false },
-  lastMine: { type: Number, default: 0 }
+  lastMine: { type: Number, default: 0 },
+    lastDaily: { type: Date, default: null }
 });
 
 const User = mongoose.model('User', UserSchema);
