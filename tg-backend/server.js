@@ -87,7 +87,7 @@ bot.onText(/\/referral/, async (msg) => {
   let userId = msg.from.id;
   await getUser(userId);
   let link = "https://t.me/pureaitoken_bot?start=" + userId;
-  bot.sendMessage(msg.chat.id, "🔗 Your link:\n" + link + "\n\nEarn 10 PURE per referral!");
+  bot.sendMessage(msg.chat.id, "🔗 Your link:\n" + link + "\n\nEarn 50 PURE per referral!");
 });
 bot.onText(/\/withdraw/, async (msg) => {
   let u = await getUser(msg.from.id);
