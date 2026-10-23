@@ -61,6 +61,7 @@ bot.onText(/\/start(?: (.+))?/, async (msg, match) => {
     "/wallet - Set TON wallet\n" +
     "/withdraw - withdraw PURE\n" +
     "/top - Top holders 🏆\n" +
+    "/daily - Daily Bonus 🎁\n" +
     "📢 Official: https://t.me/pureaiofficial\n" +
     "🤖 Bot: https://t.me/pureaitoken_bot\n" +
     "🐦 X: https://x.com/pureaitoken"
