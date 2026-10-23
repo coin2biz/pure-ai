@@ -22,7 +22,7 @@ const UserSchema = new mongoose.Schema({
   wallet: { type: String, default: "" },
   referred: { type: Boolean, default: false },
   lastMine: { type: Number, default: 0 },
-    lastDaily: { type: Date, default: null }
+  lastDaily: { type: Date, default: null }
 });
 
 const User = mongoose.model('User', UserSchema);
