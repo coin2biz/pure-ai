@@ -99,6 +99,24 @@ bot.onText(/\/referral/, async (msg) => {
   }
   bot.sendMessage(msg.chat.id, t);
 });
+bot.onText(/\/daily/, async (msg) => {
+  try {
+    let user = await getUser(msg.from.id);
+    let now = Date.now();
+    if(user.lastDaily){
+      let diff = now - new Date(user.lastDaily).getTime();
+      if(diff < 24*60*60*1000){
+        let hoursLeft = Math.ceil((24*60*60*1000 - diff) / (1000*60*60));
+        return bot.sendMessage(msg.chat.id, "⏰ Already claimed! Come back after " + hoursLeft + " hours! ⏰");
+      }
+    }
+    user.balance += 5;
+    user.lastDaily = new Date();
+    await user.save();
+    bot.sendMessage(msg.chat.id, "🎁 DAILY BONUS CLAIMED! +5 PURE! 🎁\n\nNew Balance: " + user.balance + " PURE\nCome back tomorrow!");
+  } catch(e){ console.log(e); }
+});
+
 bot.onText(/\/withdraw/, async (msg) => {
   let u = await getUser(msg.from.id);
   if(u.balance < 5000){
