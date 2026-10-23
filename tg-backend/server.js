@@ -46,7 +46,7 @@ bot.onText(/\/start(?: (.+))?/, async (msg, match) => {
     await user.save();
     let refUser = await getUser(referredBy);
     refUser.referrals += 1;
-    refUser.balance += 10;
+    refUser.balance += 50;
     await refUser.save();
     try { bot.sendMessage(referredBy, "🎉 New referral! +10 PURE"); } catch(e) {}
   }
@@ -59,6 +59,7 @@ bot.onText(/\/start(?: (.+))?/, async (msg, match) => {
     "/referral - Get your link\n" +
     "/wallet - Set TON wallet\n" +
     "/withdraw - withdraw PURE " +
+    "/top - Top holders 🏆\n" +
     "📢 Official: https://t.me/pureaiofficial\n" +
     "🤖 Bot: https://t.me/pureaitoken_bot\n" +
     "🐦 X: https://x.com/pureaitoken"
