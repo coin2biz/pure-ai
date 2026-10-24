@@ -52,7 +52,7 @@ bot.onText(/\/start(?: (.+))?/, async (msg, match) => {
     refUser.referrals += 1;
     refUser.balance += 50;
     await refUser.save();
-    try { bot.sendMessage(referredBy, "🎉 New referral! +10 PURE"); } catch(e) {}
+    try { bot.sendMessage(referredBy, "🎉 New referral! +50 PURE"); } catch(e) {}
   }
 
   bot.sendMessage(chatId,
