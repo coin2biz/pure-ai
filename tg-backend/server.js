@@ -131,12 +131,12 @@ bot.onText(/\/stake/, async (msg) => {
     return doStake(msg.chat.id, user, amt, d);
   }
   user.stakingState = "awaiting_amount"; await user.save();
-  bot.sendMessage(msg.chat.id, `💎 *PURE STAKING*\nBalance: ${user.balance} PURE\nMin: 5000\n\nAmount anuppu:\nEx: 5000`, {parse_mode:"Markdown"});
+  bot.sendMessage(msg.chat.id, `💎 *PURE STAKING*\nBalance: ${user.balance} PURE\nMin: 5000\n\nAmount :\nEx: 5000`, {parse_mode:"Markdown"});
 });
 
 bot.onText(/\/staking/, async (msg) => {
   let user = await getUser(msg.from.id);
-  if(!user.stakes || user.stakes.length==0) return bot.sendMessage(msg.chat.id, "📊 No stakes! /stake pannu 💎");
+  if(!user.stakes || user.stakes.length==0) return bot.sendMessage(msg.chat.id, "📊 No stakes! /stake 💎");
   let txt = `📊 *YOUR STAKES* 💎\n\n`;
   user.stakes.forEach((s,i)=>{
     let matured = Date.now() >= s.end;
@@ -149,10 +149,10 @@ bot.onText(/\/staking/, async (msg) => {
 bot.onText(/\/unstake/, async (msg) => {
   let user = await getUser(msg.from.id);
   let claimable = user.stakes.filter(s=>!s.claimed && Date.now()>=s.end);
-  if(claimable.length==0) return bot.sendMessage(msg.chat.id, "⏳ No matured stakes! /staking paar");
+  if(claimable.length==0) return bot.sendMessage(msg.chat.id, "⏳ No matured stakes! /staking check");
   let total=0; claimable.forEach(s=>{total+=s.total; s.claimed=true;});
   user.balance+=total; await user.save();
-  bot.sendMessage(msg.chat.id, `💰 *UNSTAKED!* 🎉\n+${total} PURE added to balance!\n/balance paar`, {parse_mode:"Markdown"});
+  bot.sendMessage(msg.chat.id, `💰 *UNSTAKED!* 🎉\n+${total} PURE added to balance!\n/balance check`, {parse_mode:"Markdown"});
 });
 
 async function doStake(chatId, user, amount, days){
