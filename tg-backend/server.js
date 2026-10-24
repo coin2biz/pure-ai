@@ -122,7 +122,68 @@ bot.onText(/\/daily/, async (msg) => {
     bot.sendMessage(msg.chat.id, "🎁 DAILY BONUS CLAIMED! +5 PURE! 🎁\n\nNew Balance: " + user.balance + " PURE\nCome back tomorrow!");
   } catch(e){ console.log(e); }
 });
+// ========== STAKING SYSTEM ==========
+bot.onText(/\/stake/, async (msg) => {
+  let user = await getUser(msg.from.id);
+  let args = msg.text.split(" ");
+  if(args.length >= 3){
+    let amt = parseInt(args[1]); let d = parseInt(args[2]);
+    return doStake(msg.chat.id, user, amt, d);
+  }
+  user.stakingState = "awaiting_amount"; await user.save();
+  bot.sendMessage(msg.chat.id, `💎 *PURE STAKING*\nBalance: ${user.balance} PURE\nMin: 5000\n\nAmount anuppu:\nEx: 5000`, {parse_mode:"Markdown"});
+});
 
+bot.onText(/\/staking/, async (msg) => {
+  let user = await getUser(msg.from.id);
+  if(!user.stakes || user.stakes.length==0) return bot.sendMessage(msg.chat.id, "📊 No stakes! /stake pannu 💎");
+  let txt = `📊 *YOUR STAKES* 💎\n\n`;
+  user.stakes.forEach((s,i)=>{
+    let matured = Date.now() >= s.end;
+    let st = s.claimed ? "✅ CLAIMED" : matured ? "🟢 READY /unstake" : "🟡 LOCKED";
+    txt+=`${i+1}. ${s.amount} | ${s.days}D | +${s.reward} | ${st}\n\n`;
+  });
+  bot.sendMessage(msg.chat.id, txt, {parse_mode:"Markdown"});
+});
+
+bot.onText(/\/unstake/, async (msg) => {
+  let user = await getUser(msg.from.id);
+  let claimable = user.stakes.filter(s=>!s.claimed && Date.now()>=s.end);
+  if(claimable.length==0) return bot.sendMessage(msg.chat.id, "⏳ No matured stakes! /staking paar");
+  let total=0; claimable.forEach(s=>{total+=s.total; s.claimed=true;});
+  user.balance+=total; await user.save();
+  bot.sendMessage(msg.chat.id, `💰 *UNSTAKED!* 🎉\n+${total} PURE added to balance!\n/balance paar`, {parse_mode:"Markdown"});
+});
+
+async function doStake(chatId, user, amount, days){
+  if(amount < 5000) return bot.sendMessage(chatId, "❌ Min 5000 PURE!");
+  if(amount > user.balance) return bot.sendMessage(chatId, `❌ Balance low! Have ${user.balance}`);
+  if(![7,30,100].includes(days)) return bot.sendMessage(chatId, "❌ Days: 7, 30 or 100 only");
+  let rates = {7:0.10,30:0.40,100:2.0};
+  let reward = amount * rates[days];
+  let total = amount + reward;
+  user.balance -= amount;
+  user.stakes.push({amount, reward, total, days, start: Date.now(), end: Date.now() + days*86400000, claimed:false});
+  user.stakingState=""; user.tempStakeAmount=0; await user.save();
+  bot.sendMessage(chatId, `✅ *STAKED!* 💎\nAmount: ${amount}\nLock: ${days}D\nReward: ${reward} (${rates[days]*100}%)\nReturn: ${total}\n\n/staking`, {parse_mode:"Markdown"});
+}
+
+bot.on("message", async (msg) => {
+  if(!msg.text || msg.text.startsWith("/")) return;
+  let user = await getUser(msg.from.id); if(!user.stakingState) return;
+  if(user.stakingState=="awaiting_amount"){
+    let amt = parseInt(msg.text); if(isNaN(amt)||amt<5000) return bot.sendMessage(msg.chat.id, "❌ Min 5000! Valid amount anuppu");
+    if(amt>user.balance) return bot.sendMessage(msg.chat.id, `❌ Low balance! ${user.balance} only`);
+    user.tempStakeAmount=amt; user.stakingState="awaiting_days"; await user.save();
+    return bot.sendMessage(msg.chat.id, `Amount: ${amt} ✅\n\nLock choose:\n1 - 7 Days (10%)\n2 - 30 Days (40%)\n3 - 100 Days (200%)\n\nType 1, 2 or 3`);
+  }
+  if(user.stakingState=="awaiting_days"){
+    let map={"1":7,"2":30,"3":100}; let d=map[msg.text.trim()];
+    if(!d) return bot.sendMessage(msg.chat.id, "❌ 1, 2 or 3 mattum!");
+    let amt=user.tempStakeAmount; user.stakingState=""; user.tempStakeAmount=0; await user.save();
+    return doStake(msg.chat.id, user, amt, d);
+  }
+});
 bot.onText(/\/withdraw/, async (msg) => {
   let u = await getUser(msg.from.id);
   if(u.balance < 5000){
