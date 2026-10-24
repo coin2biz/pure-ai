@@ -62,6 +62,9 @@ bot.onText(/\/start(?: (.+))?/, async (msg, match) => {
     "/withdraw - withdraw PURE\n" +
     "/top - Top holders 🏆\n" +
     "/daily - Daily Bonus 🎁\n" +
+    "/stake - Stake PURE & Earn 200% (Min 5000) 💎\n" +
+    "/staking - View your active stakes 📊\n" +
+    "/unstake - Claim your staking rewards 💰\n" +
     "📢 Official: https://t.me/pureaiofficial\n" +
     "🤖 Bot: https://t.me/pureaitoken_bot\n" +
     "🐦 X: https://x.com/pureaitoken"
