@@ -156,7 +156,7 @@ bot.onText(/\/unstake/, async (msg) => {
 });
 
 async function doStake(chatId, user, amount, days){
-  if(amount < 10000) return bot.sendMessage(chatId, "❌ Min 10000 PURE!");
+  if(amount < 5000) return bot.sendMessage(chatId, "❌ Min 5000 PURE!");
   if(amount > user.balance) return bot.sendMessage(chatId, `❌ Balance low! Have ${user.balance}`);
   if(![7,30,100].includes(days)) return bot.sendMessage(chatId, "❌ Days: 7, 30 or 100 only");
   let rates = {7:0.10,30:0.40,100:2.0};
