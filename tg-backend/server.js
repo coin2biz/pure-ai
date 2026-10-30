@@ -104,6 +104,36 @@ bot.onText(/\/card/, async (msg) => {
   bot.sendMessage(msg.chat.id, textCard);
 });
 
+// --- PURE CARD LOAD SYSTEM ---
+bot.onText(/\/load/, async (msg) => {
+  bot.sendMessage(msg.chat.id,
+    "💳 *PURE CARD LOAD*\n\n" +
+    "Rate: 1 USDT = 100 PURE\n\n" +
+    "Send USDT BEP20 to:\n" +
+    "`0x5ED52Ee0cf3Fc53a9C6cde84CA138739b780d6f6`\n\n" +
+    "Network: BSC BEP20 ONLY\n\n" +
+    "After payment:\n" +
+    "/confirm <TX Hash>",
+    {parse_mode: "Markdown"}
+  );
+});
+
+bot.onText(/\/confirm (.+)/, async (msg, match) => {
+  let tx = match[1];
+  bot.sendMessage(msg.chat.id, "✅ TX Received: " + tx + "\nPENDING - Admin check pannuvanga");
+  bot.sendMessage(YOUR_ADMIN_ID, "🔔 NEW LOAD!\nUser: " + msg.from.id + "\nTX: " + tx + "\nhttps://bscscan.com/tx/" + tx);
+});
+
+bot.onText(/\/approve (.+)/, async (msg, match) => {
+  if(msg.from.id != YOUR_ADMIN_ID) return;
+  let p = match[1].split(" ");
+  let u = await getUser(p[0]);
+  u.cardBalance = (u.cardBalance || 0) + parseInt(p[1]);
+  await u.save();
+  bot.sendMessage(p[0], "✅ " + p[1] + " PURE Added! /card");
+  bot.sendMessage(msg.chat.id, "✅ Done!");
+});
+                                                  
 bot.onText(/\/mine/, async (msg) => {
   let user = await getUser(msg.from.id);
   let now = Date.now();
