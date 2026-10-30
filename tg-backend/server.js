@@ -65,6 +65,7 @@ bot.onText(/\/start(?: (.+))?/, async (msg, match) => {
     "/withdraw - withdraw PURE\n" +
     "/top - Top holders 🏆\n" +
     "/daily - Daily Bonus 🎁\n" +
+    "/card - View Your Virtual PURE Card 💳\n" +
     "/stake - Stake PURE & Earn 200% (Min 5000) 💎\n" +
     "/staking - View your active stakes 📊\n" +
     "/unstake - Claim your staking rewards 💰\n" +
