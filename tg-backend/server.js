@@ -66,6 +66,8 @@ bot.onText(/\/start(?: (.+))?/, async (msg, match) => {
     "/top - Top holders 🏆\n" +
     "/daily - Daily Bonus 🎁\n" +
     "/card - View Your Virtual PURE Card 💳\n" +
+    "/load - Load PURE Card USDT BEP20 - 1 USDT = 100 PURE\n" +
+    "/confirm - Confirm USDT Payment with TX Hash\n" +
     "/stake - Stake PURE & Earn 200% (Min 5000) 💎\n" +
     "/staking - View your active stakes 📊\n" +
     "/unstake - Claim your staking rewards 💰\n" +
