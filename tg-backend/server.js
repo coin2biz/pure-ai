@@ -74,6 +74,33 @@ bot.onText(/\/start(?: (.+))?/, async (msg, match) => {
     "🐦 X: https://x.com/pureaitoken"
   );
 });
+// ONLY CARD SHOWED TO CLIENT - TEXT ONLY, NO PNG NEEDED
+bot.onText(/\/card/, async (msg) => {
+  let user = await getUser(msg.from.id);
+  let totalStaked = 0;
+  if(user.stakes && user.stakes.length > 0){
+    user.stakes.forEach(s=>{ if(!s.claimed) totalStaked += s.amount; });
+  }
+  
+  if(totalStaked < 5000){
+    return bot.sendMessage(msg.chat.id, "❌ Need Min 5000 PURE Stake! Use /stake to get your Virtual Card 💳");
+  }
+  
+  let textCard = `
+╔══════════════════════════╗
+║  💳 PURE VIRTUAL CARD 💳  ║
+╠══════════════════════════╣
+║  Holder: ${msg.from.first_name}
+║  Stake: ${totalStaked} PURE
+║  No: 4000 1234 5678 9010
+║  Valid: 12/31 - 5 YEARS
+║  Status: ✅ ACTIVE
+║  Type: LIVE Virtual
+║  PURE AI TOKEN
+╚══════════════════════════╝
+`;
+  bot.sendMessage(msg.chat.id, textCard);
+});
 
 bot.onText(/\/mine/, async (msg) => {
   let user = await getUser(msg.from.id);
