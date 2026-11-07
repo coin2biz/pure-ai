@@ -92,10 +92,9 @@ bot.onText(/\/card/, async (msg) => {
 ╠══════════════════════════╣
 ║  Holder: ${msg.from.first_name}
 ║  Stake: ${totalStaked} PURE
-║  No: 4000 1234 5678 9010
-║  Valid: 12/31 - 5 YEARS
+║  ID: PURE${msg.from.id}
 ║  Status: ✅ ACTIVE
-║  Type: LIVE Virtual
+║  Type: LIVE Virtual point card 
 ║  PURE AI TOKEN
 ╚══════════════════════════╝
 `;
