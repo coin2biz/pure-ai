@@ -76,39 +76,30 @@ bot.onText(/\/start(?: (.+))?/, async (msg, match) => {
 });
 const Jimp = require('jimp');
 const axios = require('axios');
-
-// CARD - NAME + ID + STAKE INSIDE CARD
 bot.onText(/\/card/, async (msg) => {
-  let user = await getUser(msg.from.id);
-  let totalStaked = 0;
-  if(user.stakes && user.stakes.length > 0){
-    user.stakes.forEach(s=>{ if(!s.claimed) totalStaked += s.amount; })
-  }
-  if(totalStaked < 5000){
-    return bot.sendMessage(msg.chat.id, "❌ Need Min 5000 PURE Stake to get Card\nUse /stake to stake");
-  }
   try {
-    let CARD_TEMPLATE = "https://files.catbox.moe/9x2ec2.jpg";
-    let response = await axios.get(CARD_TEMPLATE, { responseType: 'arraybuffer' });
-    let image = await Jimp.read(Buffer.from(response.data));
+    let user = await getUser(msg.from.id);
+    let totalStaked = 0;
+    if (user.stakes && user.stakes.length > 0) {
+      user.stakes.forEach(s => { if (!s.claimed) totalStaked += s.amount; });
+    }
+
+    if (totalStaked < 5000) {
+      return bot.sendMessage(msg.chat.id, "❌ Minimum 5000 PURE stake pannanum pa.");
+    }
+
     let name = msg.from.first_name || "USER";
     let idText = "PURE" + msg.from.id;
     let stakeText = totalStaked + " PURE";
-    let fontBig = await Jimp.loadFont(Jimp.FONT_SANS_64_WHITE);
-    let fontSmall = await Jimp.loadFont(Jimp.FONT_SANS_32_WHITE);
-    let w = image.bitmap.width;
-    let h = image.bitmap.height;
-    // 1. NAME
-    image.print(fontBig, w * 0.36, h * 0.48, name);
-    // 2. ID NUMBER
-    image.print(fontSmall, w * 0.36, h * 0.62, idText);
-    // 3. STAKING AMOUNT
-    image.print(fontSmall, w * 0.36, h * 0.70, "STAKE : " + stakeText);
-    let buffer = await image.getBufferAsync(Jimp.MIME_JPEG);
-    await bot.sendPhoto(msg.chat.id, buffer);
-  } catch(e){
-    console.log(e);
-    return bot.sendMessage(msg.chat.id, "Card generate pannamudiyala, thirumba try pannunga");
+    let CARD_TEMPLATE = "https://files.catbox.moe/9x2ec2.jpg";
+
+    let caption = `👤 Holder : ${name}\n🆔 ID : ${idText}\n💰 Stake : ${stakeText}\n✅ Status : ACTIVE\n💎 Type : LIVE Virtual Card`;
+
+    await bot.sendPhoto(msg.chat.id, CARD_TEMPLATE, { caption: caption });
+
+  } catch (e) {
+    console.log("CARD ERROR:", e.message);
+    return bot.sendMessage(msg.chat.id, "Card anuppa mudiyala pa, thirumba try pannunga pa.");
   }
 });
                                                
