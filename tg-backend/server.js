@@ -139,7 +139,7 @@ bot.onText(/\/stats/, async (msg) => {
   let totalMiners = await User.countDocuments();
   let totalMinedData = await User.aggregate([{ $group: { _id: null, total: { $sum: "$mined" } } }]);
   let totalMined = totalMinedData.length > 0 ? totalMinedData[0].total : 0;
-  bot.sendMessage(msg.chat.id, `📊 PURE AI TOKEN - Live Stats\n\n👥 Total Miners: ${totalMiners.toLocaleString()}\n⛏️ Total Mined: ${totalMined.toLocaleString()} PURE\n💎 Join & Mine 30 PURE Daily!`);
+  bot.sendMessage(msg.chat.id, `📊 PURE AI TOKEN - Live Stats\n\n👥 Total Miners: ${totalMiners.toLocaleString()}\n⛏️ Total Mined: ${totalMined.toLocaleString()} PURE\n💎 Join & Mine 30 PURE Every 12 hours!`);
 });
 bot.onText(/\/daily/, async (msg) => {
   try {
