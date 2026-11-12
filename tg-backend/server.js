@@ -74,33 +74,26 @@ bot.onText(/\/start(?: (.+))?/, async (msg, match) => {
     "🐦 X: https://x.com/pureaitoken"
   );
 });
-// ONLY CARD SHOWED TO CLIENT - TEXT ONLY, NO PNG NEEDED
+// ONLY CARD SHOWED TO CLIENT - IMAGE CARD
 bot.onText(/\/card/, async (msg) => {
   let user = await getUser(msg.from.id);
   let totalStaked = 0;
   if(user.stakes && user.stakes.length > 0){
-    user.stakes.forEach(s=>{ if(!s.claimed) totalStaked += s.amount; });
+    user.stakes.forEach(s=>{ if(!s.claimed) totalStaked += s.amount; })
   }
-  
   if(totalStaked < 5000){
-    return bot.sendMessage(msg.chat.id, "❌ Need Min 5000 PURE Stake! Use /stake to get your Virtual Card 💳");
+    return bot.sendMessage(msg.chat.id, "❌ Need Min 5000 PURE Stake to get Card\nUse /stake to stake");
   }
-  
-  let textCard = `
-╔══════════════════════════╗
-║  💳 PURE VIRTUAL CARD 💳  ║
-╠══════════════════════════╣
-║  Holder: ${msg.from.first_name}
-║  Stake: ${totalStaked} PURE
-║  ID: PURE${msg.from.id}
-║  Status: ✅ ACTIVE
-║  Type: LIVE Virtual point card 
-║  PURE AI TOKEN
-╚══════════════════════════╝
-`;
-  bot.sendMessage(msg.chat.id, textCard);
+  let CARD_IMG = "https://files.catbox.moe/9x2ec2.jpg";
+  let caption = `💳 *PURE VIRTUAL CARD*\n\n` +
+  `👤 Holder : ${msg.from.first_name}\n` +
+  `💰 Stake : ${totalStaked} PURE\n` +
+  `🆔 ID : PURE${msg.from.id}\n` +
+  `✅ Status : ACTIVE\n` +
+  `💎 Type : LIVE Virtual Card`;
+  await bot.sendPhoto(msg.chat.id, CARD_IMG, { caption: caption, parse_mode: "Markdown" });
 });
-                                                  
+                                                
 bot.onText(/\/mine/, async (msg) => {
   let user = await getUser(msg.from.id);
   let now = Date.now();
