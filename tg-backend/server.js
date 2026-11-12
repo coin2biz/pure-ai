@@ -74,7 +74,10 @@ bot.onText(/\/start(?: (.+))?/, async (msg, match) => {
     "🐦 X: https://x.com/pureaitoken"
   );
 });
-// ONLY CARD SHOWED TO CLIENT - IMAGE CARD
+const Jimp = require('jimp');
+const axios = require('axios');
+
+// CARD - NAME + ID + STAKE INSIDE CARD
 bot.onText(/\/card/, async (msg) => {
   let user = await getUser(msg.from.id);
   let totalStaked = 0;
@@ -84,16 +87,31 @@ bot.onText(/\/card/, async (msg) => {
   if(totalStaked < 5000){
     return bot.sendMessage(msg.chat.id, "❌ Need Min 5000 PURE Stake to get Card\nUse /stake to stake");
   }
-  let CARD_IMG = "https://files.catbox.moe/9x2ec2.jpg";
-  let caption = `💳 *PURE VIRTUAL CARD*\n\n` +
-  `👤 Holder : ${msg.from.first_name}\n` +
-  `💰 Stake : ${totalStaked} PURE\n` +
-  `🆔 ID : PURE${msg.from.id}\n` +
-  `✅ Status : ACTIVE\n` +
-  `💎 Type : LIVE Virtual Card`;
-  await bot.sendPhoto(msg.chat.id, CARD_IMG, { caption: caption, parse_mode: "Markdown" });
+  try {
+    let CARD_TEMPLATE = "https://files.catbox.moe/9x2ec2.jpg";
+    let response = await axios.get(CARD_TEMPLATE, { responseType: 'arraybuffer' });
+    let image = await Jimp.read(Buffer.from(response.data));
+    let name = msg.from.first_name || "USER";
+    let idText = "PURE" + msg.from.id;
+    let stakeText = totalStaked + " PURE";
+    let fontBig = await Jimp.loadFont(Jimp.FONT_SANS_64_WHITE);
+    let fontSmall = await Jimp.loadFont(Jimp.FONT_SANS_32_WHITE);
+    let w = image.bitmap.width;
+    let h = image.bitmap.height;
+    // 1. NAME
+    image.print(fontBig, w * 0.36, h * 0.48, name);
+    // 2. ID NUMBER
+    image.print(fontSmall, w * 0.36, h * 0.62, idText);
+    // 3. STAKING AMOUNT
+    image.print(fontSmall, w * 0.36, h * 0.70, "STAKE : " + stakeText);
+    let buffer = await image.getBufferAsync(Jimp.MIME_JPEG);
+    await bot.sendPhoto(msg.chat.id, buffer);
+  } catch(e){
+    console.log(e);
+    return bot.sendMessage(msg.chat.id, "Card generate pannamudiyala, thirumba try pannunga");
+  }
 });
-                                                
+                                               
 bot.onText(/\/mine/, async (msg) => {
   let user = await getUser(msg.from.id);
   let now = Date.now();
