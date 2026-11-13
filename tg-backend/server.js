@@ -103,7 +103,26 @@ bot.onText(/\/card/, async (msg) => {
     return bot.sendMessage(msg.chat.id, "Card anuppa mudiyala pa, thirumba try pannunga pa.");
   }
 });
-                                               
+
+bot.onText(/\/premarket/, (msg) => {
+  const chatId = msg.chat.id;
+  bot.sendMessage(chatId, `🚀 PURE PRE-MARKET LIVE
+
+💰 Price: 1 PURE = 0.02 TON
+📈 Listing Price: 1 PURE = 0.04 TON
+
+📦 PACKS:
+1 TON = 50 PURE
+2 TON = 100 PURE
+3 TON = 150 PURE
+4 TON = 200 PURE
+
+💳 Pay to this Address:
+UQCiaxkBjc3BYLxcw4Zf63CmEx0SI7jfA8bkS29dSrvhig0V
+
+✅ After payment, post Screenshot in Official Group.
+👥 Official Group: https://t.me/pureaiofficial`);
+});
 bot.onText(/\/mine/, async (msg) => {
   let user = await getUser(msg.from.id);
   let now = Date.now();
