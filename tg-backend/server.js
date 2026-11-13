@@ -117,6 +117,7 @@ bot.onText(/\/premarket/, (msg) => {
 2 TON = 100 PURE
 3 TON = 150 PURE
 4 TON = 200 PURE
+Max: 4 TON per user
 
 💳 Pay to this Address:
 UQCiaxkBjc3BYLxcw4Zf63CmEx0SI7jfA8bkS29dSrvhig0V
