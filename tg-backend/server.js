@@ -59,6 +59,7 @@ bot.onText(/\/start(?: (.+))?/, async (msg, match) => {
     "Welcome to PURE AI Token! 🚀\n\n" +
     "💎 Mine, Refer, Earn. Web3 Revolution!\n\n" +
     "/mine - Mine 30 PURE\n" +
+    "/premarket - 🚀 Pre-Market LIVE\n" +
     "/stats - Total Miners Live Stats\n" +
     "/balance - Check balance\n" +
     "/referral - Get your link\n" +
