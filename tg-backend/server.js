@@ -109,14 +109,15 @@ bot.onText(/\/premarket/, (msg) => {
   const chatId = msg.chat.id;
   bot.sendMessage(chatId, `🚀 PURE PRE-MARKET LIVE
 
-💰 Price: 1 PURE = 0.02 TON
-📈 Listing Price: 1 PURE = 0.04 TON
+💰 Price: 1 PURE = 0.002 TON
+📈 Listing Price: 1 PURE = 0.004 TON
 
 📦 PACKS:
-1 TON = 50 PURE
-2 TON = 100 PURE
-3 TON = 150 PURE
-4 TON = 200 PURE
+0.5 TON =250 PURE
+1 TON = 500 PURE
+2 TON = 1000 PURE
+3 TON = 1500 PURE
+4 TON = 2000 PURE
 Max: 4 TON per user
 
 💳 Pay to this Address:
