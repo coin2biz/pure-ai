@@ -174,7 +174,7 @@ bot.onText(/\/daily/, async (msg) => {
         return bot.sendMessage(msg.chat.id, "⏰ Already claimed! Come back after " + hoursLeft + " hours! ⏰");
       }
     }
-    user.balance += 5;
+    user.balance += 50;
     user.lastDaily = new Date();
     await user.save();
     bot.sendMessage(msg.chat.id, "🎁 DAILY BONUS CLAIMED! +5 PURE! 🎁\n\nNew Balance: " + user.balance + " PURE\nCome back tomorrow!");
